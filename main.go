@@ -7,9 +7,9 @@ import (
 	"os"
 	"os/signal"
 	"time"
-	
 
-	"github.com/michaeld3289/microservice_tutorial/coffee_ecom/handlers"
+	"github.com/MichaelD3289/go_coffee_shop/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -17,13 +17,23 @@ func main() {
 
 	products := handlers.NewProducts(logger)
 
-	sm := http.NewServeMux()
-	sm.Handle("/", products)
+	router := mux.NewRouter()
+
+	getRouter := router.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", products.GetProducts)
+
+	putRouter := router.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", products.UpdateProducts)
+	putRouter.Use(products.MiddlewareProductValidation)
+
+	postRouter := router.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", products.AddProduct)
+	postRouter.Use(products.MiddlewareProductValidation)
 
 	// create a new server
 	server := http.Server{
 		Addr:         ":9090",      
-		Handler:      sm,                // set the default handler
+		Handler:      router,                // set the default handler
 		ErrorLog:     logger,                 // set the logger for the server
 		ReadTimeout:  5 * time.Second,   // max time to read request from the client
 		WriteTimeout: 10 * time.Second,  // max time to write response to the client
