@@ -1,0 +1,18 @@
+info: {}
+paths:
+    /products:
+        get:
+            description: Returns a list of products
+            operationId: listProducts
+            responses:
+                "200":
+                    $ref: '#/responses/productsResponse'
+            tags:
+                - products
+responses:
+    productsResponse:
+        description: A list of products
+        schema:
+            items: {}
+            type: array
+swagger: "2.0"
